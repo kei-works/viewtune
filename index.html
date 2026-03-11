@@ -18,8 +18,9 @@ body { margin: 0; background: #000; color: #fff; font-family: -apple-system, san
 
 .main-wrapper { display: flex; width: 100vw; height: 100vh; visibility: hidden; position: relative; background: #000; } 
 
-.main-wrapper:fullscreen { background: #000; }
-.main-wrapper:-webkit-full-screen { background: #000; }
+/* 全画面時の挙動を安定させる */
+.main-wrapper:fullscreen { width: 100vw; height: 100vh; background: #000; }
+.main-wrapper:-webkit-full-screen { width: 100vw; height: 100vh; background: #000; }
 
 aside { 
   width: 300px; min-width: 150px; max-width: 80vw; height: 100vh; 
@@ -31,10 +32,10 @@ aside {
 }
 aside.hidden { transform: translateX(-100%); margin-left: -300px; }
 
-/* ★サイドバー開閉ボタンのz-indexを最前面(2000)に修正 */
+/* ★toggle-btnをwrapperの中に入れ、z-indexを最強にする */
 #toggle-btn {
-  position: fixed; top: 50%; left: 300px;
-  transform: translateY(-50%); z-index: 2000;
+  position: absolute; top: 50%; left: 300px;
+  transform: translateY(-50%); z-index: 9999;
   width: 16px; height: 80px; 
   background: #222; border: 1px solid #444; border-left: none;
   border-radius: 0 8px 8px 0; cursor: pointer;
@@ -89,9 +90,10 @@ aside.hidden { transform: translateX(-100%); margin-left: -300px; }
 <body>
 
 <div id="splash"><div class="splash-logo">Kei.works</div></div>
-<button id="toggle-btn"></button>
 
 <div class="main-wrapper" id="main-content">
+  <button id="toggle-btn"></button>
+  
   <aside id="sidebar">
     <canvas id="clock-cvs"></canvas>
     <div id="digital-clock">00:00:00</div>
@@ -165,8 +167,8 @@ aside.hidden { transform: translateX(-100%); margin-left: -300px; }
     toggleBtn.classList.toggle('is-hidden');
     sidebar.style.transition = 'transform 0.3s ease, margin-left 0.3s ease';
     toggleBtn.style.transition = 'left 0.3s ease, background 0.2s';
-    if(sidebar.classList.contains('hidden')) { sidebar.style.marginLeft = `-${currentWidth}px`; } 
-    else { sidebar.style.marginLeft = "0"; }
+    if(sidebar.classList.contains('hidden')) { toggleBtn.style.left = "0px"; sidebar.style.marginLeft = `-${currentWidth}px`; } 
+    else { toggleBtn.style.left = currentWidth + "px"; sidebar.style.marginLeft = "0"; }
   };
 
   resizer.addEventListener('mousedown', () => { isResizing = true; document.body.style.cursor = 'col-resize'; });
