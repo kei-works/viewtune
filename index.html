@@ -25,14 +25,13 @@ aside {
   width: 300px; min-width: 150px; max-width: 80vw; height: 100vh; 
   background: #111; border-right: 1px solid #333; 
   display: flex; flex-direction: column; align-items: center; 
-  padding: 15px 10px; box-sizing: border-box; 
-  overflow-y: auto; z-index: 1000; -webkit-overflow-scrolling: touch;
+  padding: 15px 10px 30px; box-sizing: border-box; /* 下の余白を少し広めに */
+  overflow-y: auto; overflow-x: hidden; z-index: 1000; -webkit-overflow-scrolling: touch;
   transition: transform 0.3s ease, margin-left 0.3s ease;
   flex-shrink: 0;
 }
 aside.hidden { transform: translateX(-100%); margin-left: -300px; }
 
-/* Androidの全画面モードでも消えないようにabsoluteに変更 */
 #toggle-btn {
   position: absolute; top: 50%; left: 300px;
   transform: translateY(-50%); z-index: 9999;
@@ -41,7 +40,7 @@ aside.hidden { transform: translateX(-100%); margin-left: -300px; }
   border-radius: 0 8px 8px 0; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: left 0.3s ease, background 0.2s;
-  touch-action: auto; /* タッチを確実に拾う */
+  touch-action: auto;
 }
 #toggle-btn::after { content: ""; width: 2px; height: 20px; background: #fff; border-radius: 2px; }
 #toggle-btn.is-hidden { left: 0 !important; }
@@ -56,10 +55,10 @@ aside.hidden { transform: translateX(-100%); margin-left: -300px; }
 
 #resizer { width: 14px; cursor: col-resize; background: transparent; z-index: 101; margin-left: -7px; flex-shrink: 0; }
 
-.sep { width: 100%; border-bottom: 1px solid #444; margin: 15px 0; }
+.sep { width: 100%; border-bottom: 1px solid #444; margin: 15px 0; flex-shrink: 0; }
 
-#clock-cvs { width: 90%; height: auto; aspect-ratio: 1/1; max-width: 600px; }
-#digital-clock { font-size: 2.2rem; font-weight: normal; margin: 5px 0; font-variant-numeric: tabular-nums; width: 100%; text-align: center; }
+#clock-cvs { width: 90%; height: auto; aspect-ratio: 1/1; max-width: 600px; flex-shrink: 0; }
+#digital-clock { font-size: 2.2rem; font-weight: normal; margin: 5px 0; font-variant-numeric: tabular-nums; width: 100%; text-align: center; flex-shrink: 0; }
 
 .round-btn { 
   width: 42px; height: 42px; border-radius: 50%; 
@@ -68,23 +67,25 @@ aside.hidden { transform: translateX(-100%); margin-left: -300px; }
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; 
 }
-.btn-row { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin: 8px 0; }
+.btn-row { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin: 8px 0; flex-shrink: 0; }
 
-.file-select-btn { cursor: pointer; background: #ddd; color: #000; padding: 7px 0; width: 85%; border-radius: 6px; font-size: 11px; font-weight: 700; text-align: center; margin: 0 auto 5px; display: block; }
+.file-select-btn { cursor: pointer; background: #ddd; color: #000; padding: 7px 0; width: 85%; border-radius: 6px; font-size: 11px; font-weight: 700; text-align: center; margin: 0 auto 5px; display: block; flex-shrink: 0; }
 
-.info-label { font-size: 12px; color: #fff; text-align: center; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 5px; }
+.info-label { font-size: 12px; color: #fff; text-align: center; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 5px; flex-shrink: 0; }
 
 #page-num { font-size: 14px; color: #fff; min-width: 50px; text-align: center; flex-shrink: 0; font-weight: 600; }
 
-.mode-switch { width: 85%; display: flex; background: #333; border-radius: 15px; margin: 5px auto 0; padding: 2px; }
+.mode-switch { width: 85%; display: flex; background: #333; border-radius: 15px; margin: 5px auto 0; padding: 2px; flex-shrink: 0; }
 .mode-btn { flex: 1; border: none; background: none; color: #888; font-size: 10px; font-weight: 700; padding: 6px 0; cursor: pointer; border-radius: 13px; }
 .mode-btn.active { background: #fff; color: #000; }
 
+/* コピーライトが消えないようマージンと最小高さを設定 */
+.c-text { font-size: 9px; color: #444; margin: 20px 0 10px; text-align: center; width: 100%; flex-shrink: 0; }
+
 #pdf-container { flex: 1; overflow: auto; background: #111; position: relative; }
 #pdf-canvas { position: absolute; top: 0; left: 0; display: block; transform-origin: 0 0; }
-.c-text { font-size: 9px; color: #444; margin-top: auto; padding-top: 15px; text-align: center; width: 100%; }
 
-.audio-row { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 5px; }
+.audio-row { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 5px; flex-shrink: 0; }
 #time-text { font-size: 12px; color: #fff; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 </style>
 </head>
