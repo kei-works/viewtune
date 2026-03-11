@@ -16,9 +16,8 @@ body { margin: 0; background: #000; color: #fff; font-family: -apple-system, san
 .splash-logo { font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 100; letter-spacing: 12px; animation: pulse 2s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
 
-.main-wrapper { display: flex; width: 100vw; height: 100vh; visibility: hidden; position: relative; background: #000; } 
+.main-wrapper { display: flex; width: 100vw; height: 100vh; visibility: hidden; position: relative; background: #000; overflow: hidden; } 
 
-/* 全画面時の挙動を安定させる */
 .main-wrapper:fullscreen { width: 100vw; height: 100vh; background: #000; }
 .main-wrapper:-webkit-full-screen { width: 100vw; height: 100vh; background: #000; }
 
@@ -29,18 +28,20 @@ aside {
   padding: 15px 10px; box-sizing: border-box; 
   overflow-y: auto; z-index: 1000; -webkit-overflow-scrolling: touch;
   transition: transform 0.3s ease, margin-left 0.3s ease;
+  flex-shrink: 0;
 }
 aside.hidden { transform: translateX(-100%); margin-left: -300px; }
 
-/* ★toggle-btnをwrapperの中に入れ、z-indexを最強にする */
+/* Androidの全画面モードでも消えないようにabsoluteに変更 */
 #toggle-btn {
   position: absolute; top: 50%; left: 300px;
   transform: translateY(-50%); z-index: 9999;
-  width: 16px; height: 80px; 
+  width: 20px; height: 80px; 
   background: #222; border: 1px solid #444; border-left: none;
   border-radius: 0 8px 8px 0; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: left 0.3s ease, background 0.2s;
+  touch-action: auto; /* タッチを確実に拾う */
 }
 #toggle-btn::after { content: ""; width: 2px; height: 20px; background: #fff; border-radius: 2px; }
 #toggle-btn.is-hidden { left: 0 !important; }
@@ -53,7 +54,7 @@ aside.hidden { transform: translateX(-100%); margin-left: -300px; }
   display: flex; align-items: center; justify-content: center;
 }
 
-#resizer { width: 14px; cursor: col-resize; background: transparent; z-index: 101; margin-left: -7px; }
+#resizer { width: 14px; cursor: col-resize; background: transparent; z-index: 101; margin-left: -7px; flex-shrink: 0; }
 
 .sep { width: 100%; border-bottom: 1px solid #444; margin: 15px 0; }
 
@@ -150,7 +151,7 @@ aside.hidden { transform: translateX(-100%); margin-left: -300px; }
       if (!document.webkitFullscreenElement) { target.webkitRequestFullscreen(); } 
       else { document.webkitExitFullscreen(); }
     } else {
-      alert("iOSの仕様により、通常のブラウザ枠内では全画面化できません。\nSafariの共有メニューから「ホーム画面に追加」して起動してください。");
+      alert("全画面表示がサポートされていません。iOS Safariの場合はホーム画面に追加してお試しください。");
     }
   };
   
@@ -161,7 +162,8 @@ aside.hidden { transform: translateX(-100%); margin-left: -300px; }
   document.addEventListener('fullscreenchange', updateFsBtn);
   document.addEventListener('webkitfullscreenchange', updateFsBtn);
 
-  toggleBtn.onclick = () => {
+  toggleBtn.onclick = (e) => {
+    e.stopPropagation();
     sidebar.classList.toggle('hidden'); 
     resizer.classList.toggle('hidden'); 
     toggleBtn.classList.toggle('is-hidden');
@@ -172,7 +174,7 @@ aside.hidden { transform: translateX(-100%); margin-left: -300px; }
   };
 
   resizer.addEventListener('mousedown', () => { isResizing = true; document.body.style.cursor = 'col-resize'; });
-  resizer.addEventListener('touchstart', () => { isResizing = true; });
+  resizer.addEventListener('touchstart', (e) => { isResizing = true; });
 
   const doResize = (clientX) => {
     if (!isResizing || sidebar.classList.contains('hidden')) return;
@@ -186,7 +188,9 @@ aside.hidden { transform: translateX(-100%); margin-left: -300px; }
   };
 
   window.addEventListener('mousemove', (e) => doResize(e.clientX));
-  window.addEventListener('touchmove', (e) => doResize(e.touches[0].clientX), { passive: false });
+  window.addEventListener('touchmove', (e) => {
+    if (isResizing) { doResize(e.touches[0].clientX); e.preventDefault(); }
+  }, { passive: false });
   const endResize = () => { isResizing = false; document.body.style.cursor = 'default'; sidebar.style.transition = 'transform 0.3s ease, margin-left 0.3s ease'; toggleBtn.style.transition = 'left 0.3s ease, background 0.2s'; };
   window.addEventListener('mouseup', endResize); window.addEventListener('touchend', endResize);
 
@@ -245,9 +249,7 @@ aside.hidden { transform: translateX(-100%); margin-left: -300px; }
     };
   } catch(e) {}
 
-  let initialDist = null, initialScale = 1, isMoving = false;
-  let lastX, lastY;
-  let centerX, centerY;
+  let initialDist = null, initialScale = 1, isMoving = false, lastX, lastY, centerX, centerY;
 
   container.addEventListener('touchstart', (e) => {
     if (e.touches.length === 2) {
@@ -266,15 +268,12 @@ aside.hidden { transform: translateX(-100%); margin-left: -300px; }
       e.preventDefault();
       const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
       const newScale = Math.min(Math.max(initialScale * (dist / initialDist), 0.5), 4.0);
-      
       const ratio = newScale / sc;
       const rect = container.getBoundingClientRect();
       const relX = centerX - rect.left;
       const relY = centerY - rect.top;
-      
       container.scrollLeft = (container.scrollLeft + relX) * ratio - relX;
       container.scrollTop = (container.scrollTop + relY) * ratio - relY;
-      
       sc = newScale;
       cvs.style.transform = `scale(${sc})`;
     } else if (e.touches.length === 1 && isMoving && isFreeMode) {
@@ -285,10 +284,7 @@ aside.hidden { transform: translateX(-100%); margin-left: -300px; }
   }, { passive: false });
 
   container.addEventListener('touchend', (e) => {
-    if (initialDist !== null && e.touches.length < 2) {
-      initialDist = null;
-      render(); 
-    }
+    if (initialDist !== null && e.touches.length < 2) { initialDist = null; render(); }
     isMoving = false;
   });
 
